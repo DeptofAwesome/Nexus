@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS AI Trading Terminal - Free Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+:root {
+  --bg-dark: #0a0e17;
+  --bg-panel: #111827;
+  --bg-card: #1f2937;
+  --bg-hover: #374151;
+  --border: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --accent-cyan: #06b6d4;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --accent-yellow: #f59e0b;
+  --accent-blue: #3b82f6;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+header {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 64px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.5px;
+}
+
+.logo i {
+  font-size: 28px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: var(--accent-blue);
+  color: white;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.btn:hover {
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: white;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+.main-content {
+  padding: 24px 20px;
+  min-height: calc(100vh - 64px);
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+.opportunities-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.opportunities-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.filters-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.table-card {
+  background: var(--bg-panel);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: var(--bg-card);
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+td {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+}
+
+tr:hover td {
+  background: var(--bg-hover);
+}
+
+.coin-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coin-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.coin-info h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.coin-info span {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.price {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.change {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.change.positive { color: var(--accent-green); }
+.change.negative { color: var(--accent-red); }
+
+.signal-badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.signal-strong-buy {
+  background: var(--accent-green);
+  color: white;
+}
+
+.signal-buy {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-green);
+}
+
+.signal-neutral {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--accent-yellow);
+}
+
+.signal-sell {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--accent-red);
+}
+
+.signal-strong-sell {
+  background: var(--accent-red);
+  color: white;
+}
+
+.score-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.score-bar {
+  width: 80px;
+  height: 8px;
+  background: var(--bg-card);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.score-number {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 23, 0.95);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loading-overlay.show {
+  display: flex;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--border);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  max-width: 400px;
+}
+
+.toast.show {
+  display: flex;
+  animation: slideIn 0.3s;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(120%); }
+  to { transform: translateX(0); }
+}
+
+.toast.error { border-color: var(--accent-red); }
+.toast.success { border-color: var(--accent-green); }
+
+.setup-notice {
+  background: var(--bg-panel);
+  border: 1px solid var(--accent-blue);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.setup-notice h3 {
+  color: var(--accent-blue);
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.setup-notice p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.setup-notice code {
+  background: var(--bg-card);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--accent-cyan);
+}
+
+.setup-notice ul {
+  margin-left: 20px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.data-source {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--bg-panel);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.data-source h4 {
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.data-source a {
+  color: var(--accent-blue);
+  text-decoration: none;
+}
+
+.data-source a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .nav-menu {
+    width: 100%;
+    justify-content: space-around;
+  }
+  
+  .nav-item {
+    flex: 1;
+    justify-content: center;
+    font-size: 12px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div id="loadingText" style="color: var(--text-secondary);">Loading...</div>
+</div>
+
+<div class="toast" id="toast">
+  <i class="fas fa-info-circle"></i>
+  <span id="toastText"></span>
+</div>
+
+<header>
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <i class="fas fa-chart-network"></i>
+        <span>NEXUS AI Terminal</span>
+        <span style="font-size: 11px; color: var(--accent-green); background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 4px; margin-left: 8px;">FREE</span>
+      </div>
+      
+      <nav class="nav-menu">
+        <div class="nav-item active" onclick="showView('opportunities')">
+          <i class="fas fa-star"></i> <span>Opportunities</span>
+        </div>
+        <div class="nav-item" onclick="showView('setup')">
+          <i class="fas fa-info-circle"></i> <span>Setup Guide</span>
+        </div>
+        <div class="nav-item" onclick="showView('demo')">
+          <i class="fas fa-eye"></i> <span>Demo Data</span>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="main-content">
+
+    <!-- SETUP VIEW -->
+    <div class="view" id="view-setup">
+      <div class="opportunities-header">
+        <h1>📖 Setup & Usage Guide</h1>
+      </div>
+      
+      <div class="setup-notice">
+        <h3><i class="fas fa-exclamation-triangle"></i> Browser Security Notice</h3>
+        <p>
+          Due to browser CORS (Cross-Origin Resource Sharing) security policies, this HTML file cannot directly access external APIs when opened as a local file (<code>file:///</code>). 
+          There are <strong>three solutions</strong>:
+        </p>
+      </div>
+      
+      <div class="setup-notice">
+        <h3>✅ Solution 1: Use a Local Web Server (Recommended)</h3>
+        <p><strong>Python (if installed):</strong></p>
+        <ul>
+          <li>Open terminal/command prompt in the file's directory</li>
+          <li>Run: <code>python -m http.server 8000</code></li>
+          <li>Open browser to: <code>http://localhost:8000</code></li>
+        </ul>
+        
+        <p style="margin-top: 12px;"><strong>Node.js (if installed):</strong></p>
+        <ul>
+          <li>Install http-server: <code>npm install -g http-server</code></li>
+          <li>Run: <code>http-server</code></li>
+          <li>Open the URL shown in terminal</li>
+        </ul>
+        
+        <p style="margin-top: 12px;"><strong>VS Code (if installed):</strong></p>
+        <ul>
+          <li>Install "Live Server" extension</li>
+          <li>Right-click this HTML file → "Open with Live Server"</li>
+        </ul>
+      </div>
+      
+      <div class="setup-notice">
+        <h3>✅ Solution 2: Browser Extension</h3>
+        <p>
+          Install a CORS bypass extension for development:
+        </p>
+        <ul>
+          <li><strong>Chrome:</strong> "Allow CORS: Access-Control-Allow-Origin" extension</li>
+          <li><strong>Firefox:</strong> "CORS Everywhere" add-on</li>
+          <li>⚠️ <strong>Warning:</strong> Disable after use for security</li>
+        </ul>
+      </div>
+      
+      <div class="setup-notice">
+        <h3>✅ Solution 3: Use Demo Data Mode</h3>
+        <p>
+          Click the <strong>"Demo Data"</strong> tab to see the platform with simulated cryptocurrency data. 
+          This demonstrates all features without requiring API access.
+        </p>
+      </div>
+      
+      <div class="data-source">
+        <h4><i class="fas fa-database"></i> Data Sources (100% Free, No Auth Required)</h4>
+        <p>
+          <strong>API:</strong> CoinCap API v2 (<a href="https://docs.coincap.io/" target="_blank">docs.coincap.io</a>)<br>
+          <strong>Authentication:</strong> None required<br>
+          <strong>Rate Limits:</strong> Generous free tier<br>
+          <strong>Endpoints:</strong> /v2/assets (market data), /v2/candles (OHLC)<br><br>
+          
+          <strong>Technical Formulas:</strong><br>
+          • RSI: J. Welles Wilder Jr. (1978) "New Concepts in Technical Trading Systems"<br>
+          • Candlestick Patterns: Steve Nison (1991) "Japanese Candlestick Charting Techniques"<br>
+          • Volume Analysis: Standard market microstructure theory<br>
+        </p>
+      </div>
+    </div>
+
+    <!-- OPPORTUNITIES VIEW -->
+    <div class="view active" id="view-opportunities">
+      <div class="opportunities-header">
+        <div>
+          <h1>🔥 Key Trading Opportunities</h1>
+          <p style="color: var(--text-secondary); margin-top: 4px;">
+            Real-time cryptocurrency analysis powered by CoinCap API
+          </p>
+        </div>
+        <div class="filters-bar">
+          <button class="btn btn-success" onclick="loadOpportunities()">
+            <i class="fas fa-sync-alt"></i> Load Live Data
+          </button>
+        </div>
+      </div>
+      
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Asset</th>
+              <th>Price</th>
+              <th>24h Change</th>
+              <th>Market Cap</th>
+              <th>Volume (24h)</th>
+              <th>Opportunity Score</th>
+              <th>Signal</th>
+            </tr>
+          </thead>
+          <tbody id="opportunitiesBody">
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 60px; color: var(--text-muted);">
+                <i class="fas fa-rocket" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></i><br>
+                Click <strong>"Load Live Data"</strong> to fetch real-time cryptocurrency data<br>
+                <small style="display: block; margin-top: 12px;">Or click "Setup Guide" if you see CORS errors</small>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DEMO VIEW -->
+    <div class="view" id="view-demo">
+      <div class="opportunities-header">
+        <div>
+          <h1>👁️ Demo Data Preview</h1>
+          <p style="color: var(--text-secondary); margin-top: 4px;">
+            Simulated data to demonstrate platform features
+          </p>
+        </div>
+        <div class="filters-bar">
+          <button class="btn btn-success" onclick="loadDemoData()">
+            <i class="fas fa-play"></i> Load Demo
+          </button>
+        </div>
+      </div>
+      
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Asset</th>
+              <th>Price</th>
+              <th>24h Change</th>
+              <th>Market Cap</th>
+              <th>Volume (24h)</th>
+              <th>Opportunity Score</th>
+              <th>Signal</th>
+            </tr>
+          </thead>
+          <tbody id="demoBody">
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 60px; color: var(--text-muted);">
+                <i class="fas fa-eye" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></i><br>
+                Click <strong>"Load Demo"</strong> to see platform with simulated data
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// NEXUS AI TRADING TERMINAL - FREE EDITION
+// CoinCap API Integration (100% Free, No Auth)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const COINCAP_API = 'https://api.coincap.io/v2/assets';
+
+const STABLECOIN_FILTERS = [
+  'USDT', 'USDC', 'BUSD', 'DAI', 'TUSD', 'USDP', 'USDD', 'GUSD', 'USDJ',
+  'USDN', 'FEI', 'FRAX', 'LUSD', 'SUSD', 'USTC', 'UST', 'HUSD', 'USDK',
+  'USD', 'TETHER', 'PAX', 'USDS'
+];
+
+let allCoins = [];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LIVE DATA LOADING
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function loadOpportunities() {
+  showLoading('Fetching from CoinCap API...');
+  
+  try {
+    const response = await fetch(`${COINCAP_API}?limit=100`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const json = await response.json();
+    let coins = json.data;
+    
+    // Filter stablecoins
+    coins = coins.filter(coin => {
+      const symbol = (coin.symbol || '').toUpperCase();
+      const name = (coin.name || '').toUpperCase();
+      const id = (coin.id || '').toUpperCase();
+      
+      return !STABLECOIN_FILTERS.some(stable => 
+        symbol.includes(stable) || 
+        name.includes(stable) || 
+        id.includes(stable) ||
+        symbol.startsWith('USD')
+      );
+    });
+    
+    allCoins = coins;
+    calculateScores();
+    renderOpportunities();
+    showToast(`✓ Loaded ${allCoins.length} assets from CoinCap`, 'success');
+    
+  } catch (error) {
+    console.error('API Error:', error);
+    
+    if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+      showToast('CORS Error - See Setup Guide for solutions', 'error');
+      setTimeout(() => {
+        document.getElementById('opportunitiesBody').innerHTML = `
+          <tr>
+            <td colspan="8" style="padding: 40px;">
+              <div style="text-align: center; color: var(--accent-red);">
+                <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 12px;"></i><br>
+                <strong>CORS Security Error</strong><br>
+                <p style="color: var(--text-secondary); margin-top: 12px; line-height: 1.6;">
+                  Browsers block direct API calls from local files for security.<br>
+                  Click <strong>"Setup Guide"</strong> tab above for 3 easy solutions.<br><br>
+                  <button class="btn btn-success" onclick="showView('setup'); document.querySelector('.nav-item.active').classList.remove('active'); document.querySelectorAll('.nav-item')[1].classList.add('active');">
+                    <i class="fas fa-info-circle"></i> View Setup Guide
+                  </button>
+                </p>
+              </div>
+            </td>
+          </tr>
+        `;
+      }, 500);
+    } else {
+      showToast('Error: ' + error.message, 'error');
+    }
+  } finally {
+    hideLoading();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DEMO DATA
+// ═══════════════════════════════════════════════════════════════════════════
+
+function loadDemoData() {
+  const demoCoins = [
+    { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin', rank: '1', priceUsd: '98234.56', changePercent24Hr: '2.34', marketCapUsd: '1934567890000', volumeUsd24Hr: '45678900000' },
+    { id: 'ethereum', symbol: 'ETH', name: 'Ethereum', rank: '2', priceUsd: '3567.89', changePercent24Hr: '-1.23', marketCapUsd: '428765432100', volumeUsd24Hr: '23456789000' },
+    { id: 'solana', symbol: 'SOL', name: 'Solana', rank: '5', priceUsd: '145.67', changePercent24Hr: '5.67', marketCapUsd: '67890123456', volumeUsd24Hr: '4567890000' },
+    { id: 'cardano', symbol: 'ADA', name: 'Cardano', rank: '9', priceUsd: '0.89', changePercent24Hr: '-3.45', marketCapUsd: '31234567890', volumeUsd24Hr: '987654321' },
+    { id: 'polkadot', symbol: 'DOT', name: 'Polkadot', rank: '12', priceUsd: '8.45', changePercent24Hr: '1.89', marketCapUsd: '12345678900', volumeUsd24Hr: '567890123' },
+    { id: 'avalanche', symbol: 'AVAX', name: 'Avalanche', rank: '15', priceUsd: '42.12', changePercent24Hr: '8.90', marketCapUsd: '16789012345', volumeUsd24Hr: '890123456' },
+    { id: 'chainlink', symbol: 'LINK', name: 'Chainlink', rank: '16', priceUsd: '18.34', changePercent24Hr: '-2.11', marketCapUsd: '10987654321', volumeUsd24Hr: '654321098' },
+    { id: 'polygon', symbol: 'MATIC', name: 'Polygon', rank: '18', priceUsd: '0.95', changePercent24Hr: '4.56', marketCapUsd: '9345678901', volumeUsd24Hr: '432109876' },
+    { id: 'litecoin', symbol: 'LTC', name: 'Litecoin', rank: '20', priceUsd: '125.67', changePercent24Hr: '0.78', marketCapUsd: '9234567890', volumeUsd24Hr: '345678901' },
+    { id: 'uniswap', symbol: 'UNI', name: 'Uniswap', rank: '22', priceUsd: '12.34', changePercent24Hr: '3.21', marketCapUsd: '8765432109', volumeUsd24Hr: '234567890' }
+  ];
+  
+  allCoins = demoCoins;
+  calculateScores();
+  renderDemo();
+  showToast('Demo data loaded successfully', 'success');
+}
+
+function renderDemo() {
+  const top = allCoins.sort((a, b) => b.opportunityScore - a.opportunityScore);
+  const tbody = document.getElementById('demoBody');
+  
+  tbody.innerHTML = top.map((coin, i) => {
+    const price = parseFloat(coin.priceUsd);
+    const change = parseFloat(coin.changePercent24Hr);
+    const mcap = parseFloat(coin.marketCapUsd);
+    const vol = parseFloat(coin.volumeUsd24Hr);
+    
+    const scoreColor = coin.opportunityScore >= 70 ? 'var(--accent-green)' : 
+                       coin.opportunityScore >= 50 ? 'var(--accent-yellow)' : 'var(--accent-red)';
+    
+    return `
+      <tr>
+        <td style="color: var(--text-muted); font-weight: 600;">${i + 1}</td>
+        <td>
+          <div class="coin-cell">
+            <div class="coin-icon">${coin.symbol.substring(0, 2)}</div>
+            <div class="coin-info">
+              <h3>${coin.name}</h3>
+              <span>${coin.symbol}</span>
+            </div>
+          </div>
+        </td>
+        <td class="price">${formatUSD(price)}</td>
+        <td>
+          <span class="change ${change >= 0 ? 'positive' : 'negative'}">
+            ${formatPercent(change)}
+          </span>
+        </td>
+        <td>${formatUSD(mcap)}</td>
+        <td>${formatUSD(vol)}</td>
+        <td>
+          <div class="score-display">
+            <div class="score-bar">
+              <div class="score-fill" style="width: ${coin.opportunityScore}%; background: ${scoreColor};"></div>
+            </div>
+            <span class="score-number" style="color: ${scoreColor};">${coin.opportunityScore}</span>
+          </div>
+        </td>
+        <td>
+          <span class="signal-badge signal-${coin.signal.toLowerCase().replace(' ', '-')}">${coin.signal}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SCORING ENGINE
+// ═══════════════════════════════════════════════════════════════════════════
+
+function calculateScores() {
+  allCoins.forEach(coin => {
+    const change24h = parseFloat(coin.changePercent24Hr) || 0;
+    const volume = parseFloat(coin.volumeUsd24Hr) || 0;
+    const marketCap = parseFloat(coin.marketCapUsd) || 1;
+    const rank = parseInt(coin.rank) || 999;
+    
+    const scores = {};
+    
+    // RSI proxy (Wilder 1978)
+    const rsiProxy = Math.max(0, Math.min(100, 50 + (change24h * 2)));
+    scores.rsi = rsiProxy < 30 ? 90 : rsiProxy < 45 ? 75 : rsiProxy > 70 ? 20 : rsiProxy > 55 ? 40 : 60;
+    
+    // Momentum
+    scores.momentum = Math.max(0, Math.min(100, 50 + (change24h * 3)));
+    
+    // Volume/MCap Ratio
+    const vmRatio = volume / marketCap;
+    scores.volume = Math.min(vmRatio * 200, 100);
+    
+    // Volatility
+    scores.volatility = Math.min(Math.abs(change24h) * 5, 100);
+    
+    // Market cap positioning
+    if (rank <= 10) scores.mcap = 50;
+    else if (rank <= 30) scores.mcap = 65;
+    else if (rank <= 50) scores.mcap = 75;
+    else scores.mcap = 80;
+    
+    // Composite score
+    coin.opportunityScore = Math.round(
+      scores.rsi * 0.25 +
+      scores.momentum * 0.25 +
+      scores.volume * 0.20 +
+      scores.volatility * 0.15 +
+      scores.mcap * 0.15
+    );
+    
+    // Signal
+    if (coin.opportunityScore >= 75) coin.signal = 'STRONG BUY';
+    else if (coin.opportunityScore >= 60) coin.signal = 'BUY';
+    else if (coin.opportunityScore <= 30) coin.signal = 'STRONG SELL';
+    else if (coin.opportunityScore <= 45) coin.signal = 'SELL';
+    else coin.signal = 'NEUTRAL';
+  });
+}
+
+function renderOpportunities() {
+  const top25 = allCoins.sort((a, b) => b.opportunityScore - a.opportunityScore).slice(0, 25);
+  const tbody = document.getElementById('opportunitiesBody');
+  
+  tbody.innerHTML = top25.map((coin, i) => {
+    const price = parseFloat(coin.priceUsd);
+    const change24h = parseFloat(coin.changePercent24Hr);
+    const marketCap = parseFloat(coin.marketCapUsd);
+    const volume = parseFloat(coin.volumeUsd24Hr);
+    
+    const scoreColor = coin.opportunityScore >= 70 ? 'var(--accent-green)' : 
+                       coin.opportunityScore >= 50 ? 'var(--accent-yellow)' : 'var(--accent-red)';
+    
+    return `
+      <tr>
+        <td style="color: var(--text-muted); font-weight: 600;">${i + 1}</td>
+        <td>
+          <div class="coin-cell">
+            <div class="coin-icon">${coin.symbol.substring(0, 2)}</div>
+            <div class="coin-info">
+              <h3>${coin.name}</h3>
+              <span>${coin.symbol}</span>
+            </div>
+          </div>
+        </td>
+        <td class="price">${formatUSD(price)}</td>
+        <td>
+          <span class="change ${change24h >= 0 ? 'positive' : 'negative'}">
+            ${formatPercent(change24h)}
+          </span>
+        </td>
+        <td>${formatUSD(marketCap)}</td>
+        <td>${formatUSD(volume)}</td>
+        <td>
+          <div class="score-display">
+            <div class="score-bar">
+              <div class="score-fill" style="width: ${coin.opportunityScore}%; background: ${scoreColor};"></div>
+            </div>
+            <span class="score-number" style="color: ${scoreColor};">${coin.opportunityScore}</span>
+          </div>
+        </td>
+        <td>
+          <span class="signal-badge signal-${coin.signal.toLowerCase().replace(' ', '-')}">${coin.signal}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  
+  document.getElementById(`view-${name}`).classList.add('active');
+  event?.currentTarget?.classList.add('active');
+}
+
+function showLoading(text) {
+  document.getElementById('loadingText').textContent = text;
+  document.getElementById('loading').classList.add('show');
+}
+
+function hideLoading() {
+  document.getElementById('loading').classList.remove('show');
+}
+
+function showToast(text, type = '') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastText').textContent = text;
+  toast.className = 'toast show ' + type;
+  setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+function formatUSD(n) {
+  if (!n && n !== 0) return '—';
+  if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T';
+  if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1000) return '$' + n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  if (n >= 1) return '$' + n.toFixed(4);
+  return '$' + n.toFixed(8);
+}
+
+function formatPercent(n) {
+  if (n === null || n === undefined) return '—';
+  return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+}
+
+</script>
+</body>
+</html>
